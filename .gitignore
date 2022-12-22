@@ -1,3 +1,4 @@
 cred
 .env
 env
+**/__pycache__
