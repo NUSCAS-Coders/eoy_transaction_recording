@@ -27,11 +27,16 @@ def update_artists_info(sheet_name):
     discountableMerch = progWorksheet.row_values(6)
     print(discountableMerch)
 
-    artistCount = 1 if sheet_name is None else ord(sheet_name) - ord('A') + 1
     for worksheet in worksheets:
         if re.match(r'\b[A-Z]+\b', worksheet.title) and (sheet_name is None or worksheet.title == sheet_name):
+            artistCount = ord(worksheet.title) - ord('A') + 1
             print("TITLE: ", worksheet.title)
             print(worksheet.cell(2, 3).value)
+
+            # A first update or refresh is performed
+            if sheet_name is None and worksheet.title in GlobalState().artists.keys():
+                continue
+
             artist = \
                 Artist(
                     locWorksheet.cell(artistCount + 1, 1).value,
@@ -42,8 +47,6 @@ def update_artists_info(sheet_name):
             artist.updateWorksheet(worksheet, discountableMerch)
 
             GlobalState().artists[worksheet.title] = artist 
-
-            artistCount += 1
 
     for artistName, artist in GlobalState().artists.items():
         print(artistName, artist.artistName, artist.merchMap)
