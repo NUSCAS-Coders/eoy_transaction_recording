@@ -36,26 +36,32 @@ def update_artists_info(sheet_name):
     discountableMerch = progWorksheet.row_values(6)
     print(discountableMerch)
 
-    for worksheet in worksheets:
+    for i in range(len(worksheets)):
+        worksheet = worksheets[i]
         if re.match(r'\b[A-Z]+\b', worksheet.title) and (sheet_name is None or worksheet.title == sheet_name):
-            artistCount = artistIdDict[worksheet.title]
-            print("TITLE: ", worksheet.title)
-            print(worksheet.cell(2, 3).value)
+            try:
+                artistCount = artistIdDict[worksheet.title]
+                print("TITLE: ", worksheet.title)
+                print(worksheet.cell(2, 3).value)
 
-            # A first update or refresh is performed
-            if sheet_name is None and worksheet.title in GlobalState().artists.keys():
-                continue
+                # A first update or refresh is performed
+                if sheet_name is None and worksheet.title in GlobalState().artists.keys():
+                    continue
 
-            artist = \
-                Artist(
-                    locWorksheet.cell(artistCount + 1, 1).value,
-                    worksheet.title,
-                    worksheet
-                )
+                artist = \
+                    Artist(
+                        locWorksheet.cell(artistCount + 1, 1).value,
+                        worksheet.title,
+                        worksheet
+                    )
 
-            artist.updateWorksheet(worksheet, discountableMerch)
+                artist.updateWorksheet(worksheet, discountableMerch)
 
-            GlobalState().artists[worksheet.title] = artist 
+                GlobalState().artists[worksheet.title] = artist
+            except Exception as e:
+                print(e)
+                i -= 1
+
 
     for artistName, artist in GlobalState().artists.items():
         print(artistName, artist.artistName, artist.merchMap)
@@ -86,6 +92,10 @@ def get_read(artistId):
 @user_api.route("/artistIds", methods=["GET"], defaults={"artistId": None})
 def get_read_artistIds(artistId):
     payload = list(GlobalState().artists.keys())
+    payload = *[{
+        "label": f"{a.artistId} - {a.artistName}",
+        "value": a.artistId
+    } for a in GlobalState().artists.values()],
     return (
         jsonify(success=True, data=payload),
         status.HTTP_200_OK,
@@ -96,6 +106,19 @@ def get_read_artistIds(artistId):
 def get_read_merch(artistId):
     artist = GlobalState().artists[artistId]
     payload = {k: v.toJSON() for k, v in artist.merchMap.items()},
+    return (
+        jsonify(success=True, data=payload),
+        status.HTTP_200_OK,
+        {"Content-Type": "application/json"},
+    )
+
+@user_api.route("/<artistId>/merch/id", methods=["GET"])
+def get_read_merch_id(artistId):
+    artist = GlobalState().artists[artistId]
+    payload = *[{
+        "label": f"{v.artistId}{v.merchId}",
+        "value": v.merchId
+    } for v in artist.merchMap.values()],
     return (
         jsonify(success=True, data=payload),
         status.HTTP_200_OK,

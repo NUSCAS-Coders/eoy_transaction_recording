@@ -8,6 +8,7 @@ from flask_cors import CORS
 from flask_jwt_extended import JWTManager, get_jwt
 from api.auth.controller import auth_api
 from api.user.controller import user_api
+from api.user.service import update_artists_info
 from api.post.controller import post_api
 from api.account.controller import account_api
 
@@ -43,5 +44,7 @@ if __name__ == "__main__":
     @app.route("/", methods=["GET"])
     def serve_home_page():
         return render_template('index.html')
+
+    update_artists_info('A')
 
     app.run(port=int(os.getenv("PORT")), host=os.getenv("HOST"), debug=True)

@@ -17,9 +17,24 @@
               "components": [
                 {
                   "label": "Artist ID",
+                  "widget": "choicesjs",
+                  "placeholder": "-- Select Artist ID --",
                   "tableView": true,
+                  "dataSrc": "url",
+                  "data": {
+                    "url": "http://0.0.0.0:5000/user/artistIds",
+                    "headers": [
+                      {
+                        "key": "",
+                        "value": ""
+                      }
+                    ]
+                  },
                   "key": "artistId",
-                  "type": "textfield",
+                  "type": "select",
+                  "selectValues": "data",
+                  "hideOnChildrenHidden": false,
+                  "disableLimit": false,
                   "input": true
                 }
               ],
@@ -34,9 +49,24 @@
               "components": [
                 {
                   "label": "Merch ID",
+                  "widget": "choicesjs",
                   "tableView": true,
+                  "dataSrc": "url",
+                  "data": {
+                    "url": "http://0.0.0.0:5000/user/{{data.artistId}}/merch/id",
+                    "headers": [
+                      {
+                        "key": "",
+                        "value": ""
+                      }
+                    ]
+                  },
+                  "template":"<span>{{ item.label}}<img src=\"https://drive.google.com/uc?export=preview&id=12K98sWK_zbGf-MfdbaXdNhvdOwMvNtRk\" width=\"32\"></img></span>",
+                  "refreshOn": "artistId",
                   "key": "merchId",
-                  "type": "textfield",
+                  "type": "select",
+                  "selectValues": "data",
+                  "disableLimit": false,
                   "input": true
                 }
               ],
