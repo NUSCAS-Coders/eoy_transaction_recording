@@ -9,8 +9,17 @@ from .models.user import User
 from .service import create_user
 from flask_api import status
 import re
+import string
 
 user_api = Blueprint("user", __name__)
+
+artistIdDict = {
+    **{c: ord(c) - ord('A') + 1 for c in string.ascii_uppercase},
+    'AA': ord('Z') + 2,
+    'AB': ord('Z') + 3,
+    'AC': ord('Z') + 4,
+    'AD': ord('Z') + 5,
+}
 
 # Updates artist details
 @user_api.route("/update", methods=["GET"], defaults={"sheet_name": None})
@@ -29,7 +38,7 @@ def update_artists_info(sheet_name):
 
     for worksheet in worksheets:
         if re.match(r'\b[A-Z]+\b', worksheet.title) and (sheet_name is None or worksheet.title == sheet_name):
-            artistCount = ord(worksheet.title) - ord('A') + 1
+            artistCount = artistIdDict[worksheet.title]
             print("TITLE: ", worksheet.title)
             print(worksheet.cell(2, 3).value)
 
