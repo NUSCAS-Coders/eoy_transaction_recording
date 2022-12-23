@@ -10,18 +10,19 @@ class JSONSerializable():
         return json.loads(json.dumps(self, default=lambda o: o.__dict__))
 
 class Transaction(JSONSerializable):
-    def __init__(self, artistId, merchId, qty, price):
+    def __init__(self, artistId, merch, qty, price):
         self.artistId = artistId
-        self.merchId = merchId
+        self.merch = merch
         self.qty = qty
         self.price = price
 
 class Merch(JSONSerializable):
-    def __init__(self, merchId, artistId, currentStock, initialPrice, discountable = False):
-        print(merchId, artistId, currentStock, initialPrice)
+    def __init__(self, merchId, index, artistId, currentStock, initialPrice, discountable = False):
+        print(merchId, index, artistId, currentStock, initialPrice)
         self.artistId = artistId
         self.merchId = merchId
-        self.currentStock = currentStock
+        self.index = index
+        self.currentStock = int(currentStock)
         self.initialPrice = initialPrice
         self.discountable = discountable
 
@@ -42,34 +43,31 @@ class Artist(JSONSerializable):
     def updateWorksheet(self, worksheet, discountableMerch):
         self.worksheet = worksheet
         self.df = getDfFromWorksheet(worksheet)
-
-        for merch in filter(
-            lambda x: re.match(r'[A-Z]+[0-9]+', x),
-            self.df.columns
-        ):
-            print("MERCH: ", merch)
-
+        count = 0
+        for merch in self.df.columns[1:]:
             print(self.merchMap)
             self.merchMap[merch] = Merch(
-                re.search(r'[0-9]+', merch).group(),
+                merch.replace(self.artistId, '', 1),
+                count,
                 self.artistId,
                 self.df.loc['Current Stock', merch],
                 self.df.loc['Initial Price', merch],
                 merch in discountableMerch
             )
+            count +=1
 
     def handlePurchase(self, transactions: List[Transaction]):
         for id, transaction in enumerate(transactions):
             print("hi: ", transaction.toJSON())
-            existingTransactions = self.worksheet.col_values(OFFSET_MERCH_COL + transaction.merchId)[OFFSET_TRANSACTION_ROW:]
+            existingTransactions = self.worksheet.col_values(OFFSET_MERCH_COL + transaction.merch.index)[OFFSET_TRANSACTION_ROW:]
             
             for i in range(transaction.qty):
                 self.worksheet.update_cell(
                     OFFSET_TRANSACTION_ROW + len(existingTransactions) + OFFSET_TRANSACTION_PARTITION_ROW + i, 
-                    OFFSET_MERCH_COL + transaction.merchId, 
+                    OFFSET_MERCH_COL + transaction.merch.index, 
                     transaction.price
                 ) 
 
-            print(self.worksheet.col_values(OFFSET_MERCH_COL + transaction.merchId)[OFFSET_TRANSACTION_ROW:])
+            print(self.worksheet.col_values(OFFSET_MERCH_COL + transaction.merch.index)[OFFSET_TRANSACTION_ROW:])
 
     

@@ -1,6 +1,6 @@
 from api.user.models.user import User
 from commons.GlobalState import GlobalState
-from commons.constants import EOY_TRANSACTION_GSHEET_API_URL
+from commons.constants import EOY_TRANSACTION_GSHEET_API_URL, OFFSET_SUMMARY_NAME_ROW
 from config.db import db
 from flask import Blueprint, jsonify, request
 from flask_api import status
@@ -26,8 +26,8 @@ def update_artists_info(sheet_name):
         # sheet_name = None
     worksheets = getWorksheetsFromGsheetId(EOY_TRANSACTION_GSHEET_API_URL)
     locWorksheet = list(filter(lambda ws: ws.title == 'List of contents', worksheets))[0]
-
     progWorksheet = list(filter(lambda ws: ws.title == 'Programming Sheet', worksheets))[0]
+    summaryWorksheet = list(filter(lambda ws: ws.title == 'Summary', worksheets))[0]
 
     discountableMerch = progWorksheet.row_values(6)
     print(discountableMerch)
@@ -43,10 +43,10 @@ def update_artists_info(sheet_name):
                 # A first update or refresh is performed
                 if sheet_name is None and worksheet.title in GlobalState().artists.keys():
                     continue
-
+                print("NAME: ", summaryWorksheet.cell(1, artistCount + OFFSET_SUMMARY_NAME_ROW).value)
                 artist = \
                     Artist(
-                        locWorksheet.cell(artistCount + 1, 1).value,
+                        summaryWorksheet.cell(1, artistCount + OFFSET_SUMMARY_NAME_ROW).value,
                         worksheet.title,
                         worksheet
                     )

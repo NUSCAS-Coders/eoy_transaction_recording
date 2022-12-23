@@ -22,7 +22,11 @@ if __name__ == "__main__":
     app = Flask(
         __name__,
     )
-    cors = CORS(app)
+    cors = CORS(app, resource={
+    r"/*":{
+        "origins":"*"
+    }})
+
     app.config['CORS_HEADERS'] = 'Content-Type'
     # config_db(app)
     # jwt = JWTManager(app)
@@ -45,6 +49,6 @@ if __name__ == "__main__":
     def serve_home_page():
         return render_template('index.html')
 
-    update_artists_info('A')
+    update_artists_info('W')
 
     app.run(port=int(os.getenv("PORT")), host=os.getenv("HOST"), debug=True)

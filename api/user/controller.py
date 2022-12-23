@@ -1,4 +1,6 @@
+from typing import List
 from flask import Blueprint, json, jsonify, request
+from flask_cors import cross_origin
 from api.user.service import read_all_user, read_one_user, update_user_password,update_users
 from commons.GlobalState import GlobalState
 from commons.constants import EOY_TRANSACTION_GSHEET_API_URL
@@ -117,8 +119,54 @@ def get_read_merch_id(artistId):
     artist = GlobalState().artists[artistId]
     payload = *[{
         "label": f"{v.artistId}{v.merchId}",
-        "value": v.merchId
-    } for v in artist.merchMap.values()],
+        "value": f"{v.artistId}{v.merchId}"
+    } for v in filter(
+        lambda a: a.currentStock > 0,
+        artist.merchMap.values()
+    )],
+
+    return (
+        jsonify(success=True, data=payload),
+        status.HTTP_200_OK,
+        {"Content-Type": "application/json"},
+    )
+
+@user_api.route("/<artistId>/merch/<merchId>/price", methods=["GET"])
+def get_read_merch_price(artistId, merchId):
+    artist = GlobalState().artists[artistId]
+    merch = artist.merchMap[merchId]
+    payload = [
+        {
+            "label": f"{merch.initialPrice}",
+            "value": float(merch.initialPrice[1:])
+        }
+    ]
+
+    if merch.discountable:
+        payload.append(
+            {
+                "label": f"Giveaway",
+                "value": 0
+            }
+        )
+    
+    return (
+        jsonify(success=True, data=payload),
+        status.HTTP_200_OK,
+        {"Content-Type": "application/json"},
+    )
+
+@user_api.route("/<artistId>/merch/<merchId>/qty/range", methods=["GET"])
+def get_read_merch_qty(artistId, merchId):
+    artist = GlobalState().artists[artistId]
+    merch = artist.merchMap[merchId]
+    payload = [
+        {
+            "label": f"{i}",
+            "value": i
+        }
+    for i in range(1, merch.currentStock+1)]
+
     return (
         jsonify(success=True, data=payload),
         status.HTTP_200_OK,
@@ -128,10 +176,17 @@ def get_read_merch_id(artistId):
 @user_api.route("/merch", methods=["POST"])
 def update_merch_transaction():
     print(request.json)
+    if request.json is None:
+        return (
+        jsonify(success=False),
+        status.HTTP_500_INTERNAL_SERVER_ERROR,
+        {"Content-Type": "application/json"},
+    )
+
     listOfTransactions = map(
         lambda d: Transaction(
             d["artistId"],
-            d["merchId"],
+            GlobalState().artists[d["artistId"]].merchMap[d["merchId"]],
             d["qty"],
             d["price"]
         ),
@@ -145,7 +200,7 @@ def update_merch_transaction():
 
     print(listOfArtistIds)
 
-    artists = filter(lambda a: a.artistId in listOfArtistIds, GlobalState().artists.values())
+    artists: List[Artist] = list(filter(lambda a: a.artistId in listOfArtistIds, GlobalState().artists.values()))
 
     for artist in artists:
         print(artist)
