@@ -26,46 +26,68 @@ const updateMerch = async (transactions) => {
 }
 
 window.onload = async () => {
-	const formJson = await fetch('static/formio.json').then(res => res.text())
-	console.log(formJson)
-	const form = await Formio.createForm(document.getElementById('formio'), JSON.parse(formJson));
-	form.submission.data.curr = {}
-	form.on('change', changed => {
+	const formTransactionJson = await fetch('static/submitTransaction.json').then(res => res.text())
+	const formHistoryJson = await fetch('static/historyTransaction.json').then(res => res.text())
+	const pastTransactions = await fetch('static/transactions.json').then(res => res.text())
+	console.log("trans: ", pastTransactions)
+	console.log(formTransactionJson)
+
+	
+	const formHistory = await Formio.createForm(document.getElementById('formioHistory'), JSON.parse(formHistoryJson));
+
+	console.log(formHistory)
+	formHistory.submission.data.curr = {}
+	formHistory.submission = {
+		data: {
+			merchandisesToTransact: JSON.parse(pastTransactions)
+		}
+	}
+
+	const formTransaction = await Formio.createForm(document.getElementById('formioTransaction'), JSON.parse(formTransactionJson));
+
+	console.log(formTransaction)
+	formTransaction.submission.data.curr = {}
+
+	formTransaction.on('change', changed => {
 		console.log(changed)
 		if (changed.state == 'submitted') {
 			return
 		}
-		const artistIdComponent = form.getComponent('artistId')
-		const merchIdComponent = form.getComponent('merchId')
-		const priceComponent = form.getComponent('price')
-		const qtyComponent = form.getComponent('qty')
+		const artistIdComponent = formTransaction.getComponent('artistId')
+		const merchIdComponent = formTransaction.getComponent('merchId')
+		const priceComponent = formTransaction.getComponent('price')
+		const qtyComponent = formTransaction.getComponent('qty')
+		const datetimeComponent = formTransaction.getComponent('datetime')
+		console.log("DT: ", datetimeComponent)
+		datetimeComponent.setValue(new Date().toLocaleString('en-GB'));
 		const changedCompKey = changed.changed.component.key 
 		switch(changedCompKey) {
 			case 'artistId':
-				form.submission.data.curr[changedCompKey] = changed.changed.value.value
+				formTransaction.submission.data.curr[changedCompKey] = changed.changed.value.value
 				break;
 			case 'merchId':
-				form.submission.data.curr[changedCompKey] = changed.changed.value.value
+				formTransaction.submission.data.curr[changedCompKey] = changed.changed.value.value
 				break;
 			case 'price':
-				form.submission.data.curr[changedCompKey] = changed.changed.value.value
+				formTransaction.submission.data.curr[changedCompKey] = changed.changed.value.value
 				break;
 			case 'qty':
-				form.submission.data.curr[changedCompKey] = changed.changed.value.value
+				formTransaction.submission.data.curr[changedCompKey] = changed.changed.value.value
 				break;
 		}
-		console.log(form.getComponent('artistId'))
+		console.log(formTransaction.getComponent('artistId'))
 	})
 
-	form.on('submit', async submission => {
+	formTransaction.on('submit', async submission => {
 		console.log(submission)
 		const formData = submission.data.merchandisesToTransact
 		const transactions = formData.map(
 			data => ({
-				artistId: data.artistId.value,
-				merchId: data.merchId.value,
-				qty: data.qty.value,
-				price: data.price.value
+				artistId: data.artistId,
+				merchId: data.merchId,
+				qty: data.qty,
+				price: data.price,
+				datetime: data.datetime
 			})
 		) 		
 		await updateMerch(

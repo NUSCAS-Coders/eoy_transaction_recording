@@ -49,6 +49,7 @@ if __name__ == "__main__":
     def serve_home_page():
         return render_template('index.html')
 
-    update_artists_info('W')
 
-    app.run(port=int(os.getenv("PORT")), host=os.getenv("HOST"), debug=True)
+    if __name__ == "__main__":
+        update_artists_info()
+        app.run(port=int(os.getenv("PORT")), host=os.getenv("HOST"), debug=True)

@@ -10,11 +10,12 @@ class JSONSerializable():
         return json.loads(json.dumps(self, default=lambda o: o.__dict__))
 
 class Transaction(JSONSerializable):
-    def __init__(self, artistId, merch, qty, price):
+    def __init__(self, artistId, merch, qty, price, formRepr):
         self.artistId = artistId
         self.merch = merch
         self.qty = qty
         self.price = price
+        self.formRepr = formRepr
 
 class Merch(JSONSerializable):
     def __init__(self, merchId, index, artistId, currentStock, initialPrice, discountable = False):
@@ -56,7 +57,7 @@ class Artist(JSONSerializable):
             )
             count +=1
 
-    def handlePurchase(self, transactions: List[Transaction]):
+    def handlePurchase(self, transactions: List[Transaction], savedTransactions):
         for id, transaction in enumerate(transactions):
             print("hi: ", transaction.toJSON())
             existingTransactions = self.worksheet.col_values(OFFSET_MERCH_COL + transaction.merch.index)[OFFSET_TRANSACTION_ROW:]
@@ -69,5 +70,9 @@ class Artist(JSONSerializable):
                 ) 
 
             print(self.worksheet.col_values(OFFSET_MERCH_COL + transaction.merch.index)[OFFSET_TRANSACTION_ROW:])
+
+            savedTransactions.append(
+                transaction.formRepr
+            )
 
     

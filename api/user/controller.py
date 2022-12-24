@@ -16,11 +16,37 @@ import string
 user_api = Blueprint("user", __name__)
 
 artistIdDict = {
-    **{c: ord(c) - ord('A') + 1 for c in string.ascii_uppercase},
-    'AA': ord('Z') + 2,
-    'AB': ord('Z') + 3,
-    'AC': ord('Z') + 4,
-    'AD': ord('Z') + 5,
+    'A': 1,
+    'B': 2,
+    'C': 3,
+    'D': 4,
+    'E': 5,
+    'F': 6,
+    'G': 7,
+    'H': 8,
+    'I': 9,
+    'J': 10,
+    'K': 11,
+    'L1': 12,
+    'L2': 13,
+    'M': 14,
+    'N': 15,
+    'O': 16,
+    'P': 17,
+    'Q': 18,
+    'R': 19,
+    'S': 20,
+    'T': 21,
+    'U': 22,
+    'V': 23,
+    'W': 24,
+    'X': 25,
+    'Y': 26,
+    'Z': 27,
+    'AA': 28,
+    'AB': 29,
+    'AC': 30,
+    'AD': 31,
 }
 
 # Updates artist details
@@ -52,7 +78,7 @@ def update_artists_info(sheet_name):
 
                 artist = \
                     Artist(
-                        locWorksheet.cell(artistCount + 1, 1).value,
+                        locWorksheet.cell(artistCount, 1).value,
                         worksheet.title,
                         worksheet
                     )
@@ -185,16 +211,17 @@ def update_merch_transaction():
 
     listOfTransactions = map(
         lambda d: Transaction(
-            d["artistId"],
-            GlobalState().artists[d["artistId"]].merchMap[d["merchId"]],
-            d["qty"],
-            d["price"]
+            d["artistId"]["value"],
+            GlobalState().artists[d["artistId"]["value"]].merchMap[d["merchId"]["value"]],
+            d["qty"]["value"],
+            d["price"]["value"],
+            d
         ),
         request.json
     )
 
     listOfArtistIds = set(list(map(
-        lambda d: d["artistId"],
+        lambda d: d["artistId"]["value"],
         request.json
     )))
 
@@ -202,14 +229,25 @@ def update_merch_transaction():
 
     artists: List[Artist] = list(filter(lambda a: a.artistId in listOfArtistIds, GlobalState().artists.values()))
 
+    savedTransactions = []
+    with open('static/transactions.json', 'r') as f:
+        if f is not None:
+            savedTransactions = json.loads(f.read())
+    
     for artist in artists:
         print(artist)
         artist.handlePurchase(
             list(filter(
                 lambda t: t.artistId == artist.artistId,
                 listOfTransactions
-            ))
+            )),
+            savedTransactions
         )
+
+
+    with open('static/transactions.json', 'w') as f:
+        f.write(json.dumps(savedTransactions))
+
     payload = True
 
     return (
