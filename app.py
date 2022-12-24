@@ -39,7 +39,7 @@ if __name__ == "__main__":
 
     @app.route("/", methods=["GET"])
     def serve_home_page():
-        return render_template('index.html')
+        return render_template('index.html', SERVER_URL=os.getenv("SERVER_URL"))
 
 
     if __name__ == "__main__":

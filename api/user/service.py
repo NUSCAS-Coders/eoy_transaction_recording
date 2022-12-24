@@ -19,10 +19,10 @@ artistIdDict = {}
 artistNameDict = {}
 print(artistIdDict)
 
-def update_artists_info(sheet_name=None, isNotRepeatable=False):
+def update_artists_info(sheet_name=None):
 
-    # if len(GlobalState().artists) == 0:
-        # sheet_name = None
+    if len(GlobalState().artists) == 0:
+        sheet_name = None
 
     mode = os.getenv("MODE").upper()
     worksheets = getWorksheetsFromGsheetId(
@@ -52,53 +52,57 @@ def update_artists_info(sheet_name=None, isNotRepeatable=False):
 
     while i  < len(worksheets):
         worksheet = worksheets[i]
-        if re.match(r'\b[A-Z]+[0-9]*\b', worksheet.title) and (sheet_name is None or worksheet.title == sheet_name):
-            try:
-                imageFormula = worksheet.row_values(2, value_render_option='FORMULA')[OFFSET_TRANSACTION_PARTITION_ROW:]
 
-                def resolveFormula(f):
-                    match = re.search(r'(?<=(IMAGE\(\")).*(?=(\"\)))', f)
-                    return match.group() if match is not None else re.split(r'\s*,\s*', f)
+        if not (re.match(r'\b[A-Z]+[0-9]*\b', worksheet.title) and (sheet_name is None or worksheet.title == sheet_name)):
+            i += 1
+            continue
 
-                imageLinks = list(map(
-                    lambda f: resolveFormula(f),
-                    imageFormula
-                ))
-                artistName = GlobalState().artistNameDict[worksheet.title]
-                print("TITLE: ", worksheet.title)
-                # print(worksheet.cell(2, 3).value)
+        try:
+            imageFormula = worksheet.row_values(2, value_render_option='FORMULA')[OFFSET_TRANSACTION_PARTITION_ROW:]
 
-                # A first update or refresh is performed
-                if sheet_name is None and worksheet.title in GlobalState().artists.keys():
-                    continue
+            def resolveFormula(f):
+                match = re.search(r'(?<=(IMAGE\(\")).*(?=(\"\)))', f)
+                return match.group() if match is not None else re.split(r'\s*,\s*', f)
 
-                # print("NAME: ", summaryWorksheet.cell(1, artistCount + OFFSET_SUMMARY_NAME_ROW).value)
-                artist = \
-                    Artist(
-                        artistName,
-                        worksheet.title,
-                        worksheet,
-                        imageLinks
-                    )
+            imageLinks = list(map(
+                lambda f: resolveFormula(f),
+                imageFormula
+            ))
+            artistName = GlobalState().artistNameDict[worksheet.title]
+            print("TITLE: ", worksheet.title)
+            # print(worksheet.cell(2, 3).value)
 
-                artist.updateWorksheet(worksheet, discountableMerch)
-
-                for merchId in artist.merchMap.keys():
-                    newListOfImageLinks = []
-                    if isinstance(artist.merchMap[merchId].imageLink, list):
-                        for l in artist.merchMap[merchId].imageLink:
-                           newListOfImageLinks.append(
-                                artist.merchMap[l].imageLink
-                           ) 
-                        artist.merchMap[merchId].imageLink = newListOfImageLinks
-
-                GlobalState().artists[worksheet.title] = artist
-
-            except APIError as e:
-                print("Error: ", e, type(e).__name__)
-                time.sleep(0.1)
+            # A first update or refresh is performed
+            if sheet_name is None and worksheet.title in GlobalState().artists.keys():
                 continue
-        print("I: ", i)
+
+            # print("NAME: ", summaryWorksheet.cell(1, artistCount + OFFSET_SUMMARY_NAME_ROW).value)
+            artist = \
+                Artist(
+                    artistName,
+                    worksheet.title,
+                    worksheet,
+                    imageLinks
+                )
+
+            artist.updateWorksheet(worksheet, discountableMerch)
+
+            for merchId in artist.merchMap.keys():
+                newListOfImageLinks = []
+                if isinstance(artist.merchMap[merchId].imageLink, list):
+                    for l in artist.merchMap[merchId].imageLink:
+                        newListOfImageLinks.append(
+                            artist.merchMap[l].imageLink
+                        ) 
+                    artist.merchMap[merchId].imageLink = newListOfImageLinks
+
+            GlobalState().artists[worksheet.title] = artist
+
+        except APIError as e:
+            print("Error: ", e, type(e).__name__)
+            time.sleep(0.1)
+            continue
+
         i += 1
 
 def create_user(

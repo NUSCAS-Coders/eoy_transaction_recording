@@ -26,7 +26,9 @@ const updateMerch = async (transactions) => {
 }
 
 window.onload = async () => {
-	const formTransactionJson = await fetch('static/submitTransaction.json').then(res => res.text())
+	var formTransactionJson = await fetch('static/submitTransaction.json').then(res => res.text())
+	formTransactionJson = formTransactionJson.replace("<SERVER_URL>", SERVER_URL)
+	console.log(formTransactionJson)
 	const formHistoryJson = await fetch('static/historyTransaction.json').then(res => res.text())
 	const pastTransactions = await fetch('static/transactions.json').then(res => res.text())
 	console.log("trans: ", pastTransactions)
