@@ -1,4 +1,4 @@
-const SERVER_URL_DEV = "0.0.0.0:5000";
+const SERVER_URL_DEV = SERVER_URL;
 formData = {}
 
 const updateModels = async () => {
