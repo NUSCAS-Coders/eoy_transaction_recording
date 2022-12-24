@@ -54,7 +54,7 @@
                   "tableView": true,
                   "dataSrc": "url",
                   "data": {
-                    "url": "http://0.0.0.0:5000/user/{{data.curr.artistId}}/merch/id",
+                    "url": "http://0.0.0.0:5000/user/{{data.artistId}}/merch/id",
                     "headers": [
                       {
                         "key": "",
@@ -82,12 +82,12 @@
             {
               "components": [
                 {
-                  "label": "Price ID",
+                  "label": "Price",
                   "widget": "choicesjs",
                   "tableView": true,
                   "dataSrc": "url",
                   "data": {
-                    "url": "http://0.0.0.0:5000/user/{{data.curr.artistId}}/merch/{{data.curr.merchId}}/price",
+                    "url": "http://0.0.0.0:5000/user/{{data.artistId}}/merch/{{data.merchId}}/price",
                     "headers": [
                       {
                         "key": "",
@@ -96,8 +96,8 @@
                     ]
                   },
                   "template":"<span>{{ item.label}}</span>",
-                  "refreshOn": "merchId",
                   "key": "price",
+                  "refreshOn": "merchId",
                   "type": "select",
                   "selectValues": "data",
                   "disableLimit": false,
@@ -119,7 +119,7 @@
                   "tableView": true,
                   "dataSrc": "url",
                   "data": {
-                    "url": "http://0.0.0.0:5000/user/{{data.curr.artistId}}/merch/{{data.curr.merchId}}/qty/range",
+                    "url": "http://0.0.0.0:5000/user/{{data.artistId}}/merch/{{data.merchId}}/qty/range",
                     "headers": [
                       {
                         "key": "",

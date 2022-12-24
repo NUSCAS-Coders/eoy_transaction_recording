@@ -3,7 +3,6 @@ from flask import Blueprint, json, jsonify, request
 from flask_cors import cross_origin
 from api.user import service as user_service
 from commons.GlobalState import GlobalState
-from commons.constants import EOY_TRANSACTION_GSHEET_API_URL
 from config.db import db
 from helpers.gsheet import getWorksheetsFromGsheetId
 from models.Artist import Artist, Transaction

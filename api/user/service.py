@@ -1,13 +1,15 @@
 from gspread.client import APIError
 from api.user.models.user import User
 from commons.GlobalState import GlobalState
-from commons.constants import EOY_TRANSACTION_GSHEET_API_URL, OFFSET_SUMMARY_NAME_ROW, OFFSET_TRANSACTION_PARTITION_ROW
+from commons.constants import OFFSET_SUMMARY_NAME_ROW, OFFSET_TRANSACTION_PARTITION_ROW
 from config.db import db
 from flask import Blueprint, json, jsonify, request
 from flask_api import status
+import time
 
 from helpers.gsheet import getWorksheetsFromGsheetId
 import string
+import os
 
 from models.Artist import Artist
 
@@ -21,7 +23,13 @@ def update_artists_info(sheet_name=None, isNotRepeatable=False):
 
     # if len(GlobalState().artists) == 0:
         # sheet_name = None
-    worksheets = getWorksheetsFromGsheetId(EOY_TRANSACTION_GSHEET_API_URL)
+
+    mode = os.getenv("MODE").upper()
+    worksheets = getWorksheetsFromGsheetId(
+        os.getenv(f"DOCID_{mode}"), 
+        sheet_name
+    )
+
     locWorksheet = list(filter(lambda ws: ws.title == 'List of contents', worksheets))[0]
     progWorksheet = list(filter(lambda ws: ws.title == 'Programming Sheet', worksheets))[0]
     summaryWorksheet = list(filter(lambda ws: ws.title == 'Summary', worksheets))[0]
@@ -88,6 +96,7 @@ def update_artists_info(sheet_name=None, isNotRepeatable=False):
 
             except APIError as e:
                 print("Error: ", e, type(e).__name__)
+                time.sleep(0.1)
                 continue
         print("I: ", i)
         i += 1

@@ -5,6 +5,11 @@ import pandas as pd
 
 PATH_TO_CREDENTIALS = "./cred/gsheets/credentials_excel.json"
 
+scope = ['https://spreadsheets.google.com/feeds']
+credentials = ServiceAccountCredentials.from_json_keyfile_name(PATH_TO_CREDENTIALS, scope)
+df_list = []
+client = gspread.authorize(credentials)
+
 def getDfFromWorksheet(worksheet) -> pd.DataFrame:
     worksheet_values = worksheet.get_all_values()
     df_worksheet = pd.DataFrame(worksheet_values)
@@ -28,15 +33,20 @@ def getDfFromWorksheet(worksheet) -> pd.DataFrame:
 """
 Get a Dataframe of all spreadsheets in the worksheet, concatanated one against the next.
 """
-def getWorksheetsFromGsheetId(docid):
-    scope = ['https://spreadsheets.google.com/feeds']
-    credentials = ServiceAccountCredentials.from_json_keyfile_name(PATH_TO_CREDENTIALS, scope)
-    df_list = []
-    client = gspread.authorize(credentials)
+def getWorksheetsFromGsheetId(docid, sheetName=None):
+    
     spreadsheet = client.open_by_key(docid)
     missing_column_names = None
     output_df = None
-    worksheets = spreadsheet.worksheets()
+    if sheetName:
+        worksheets = [
+            spreadsheet.worksheet('List of contents'),
+            spreadsheet.worksheet('Programming Sheet'),
+            spreadsheet.worksheet('Summary'),
+            spreadsheet.worksheet(sheetName)
+        ]
+    else:
+        worksheets = spreadsheet.worksheets()
     return worksheets
 """
 def getAllWorksheets(docid):

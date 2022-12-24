@@ -50,7 +50,7 @@ window.onload = async () => {
 
 	formTransaction.on('change', changed => {
 		console.log(changed)
-		if (changed.state == 'submitted') {
+		if (changed.state == 'submitted' || !changed?.changed) {
 			return
 		}
 		const artistIdComponent = formTransaction.getComponent('artistId')
@@ -59,23 +59,37 @@ window.onload = async () => {
 		const qtyComponent = formTransaction.getComponent('qty')
 		const datetimeComponent = formTransaction.getComponent('datetime')
 		console.log("DT: ", datetimeComponent)
+		console.log(changed)
 		datetimeComponent.setValue(new Date().toLocaleString('en-GB'));
 		const changedCompKey = changed.changed.component.key 
+
 		switch(changedCompKey) {
 			case 'artistId':
-				formTransaction.submission.data.curr[changedCompKey] = changed.changed.value.value
-				break;
 			case 'merchId':
-				formTransaction.submission.data.curr[changedCompKey] = changed.changed.value.value
-				break;
 			case 'price':
-				formTransaction.submission.data.curr[changedCompKey] = changed.changed.value.value
-				break;
 			case 'qty':
-				formTransaction.submission.data.curr[changedCompKey] = changed.changed.value.value
+				formTransaction.submission = {
+					data: {
+						...formTransaction.submission.data,
+						[changedCompKey]: changed.changed.value.value
+					}
+				}
+				break;
+
+			default:
 				break;
 		}
+		console.log(formTransaction)
 		console.log(formTransaction.getComponent('artistId'))
+	})
+
+	formTransaction.on('error', async err => {
+		console.log("ERR: ", err)
+		Swal.fire({
+			title: 'Error!',
+			text: JSON.stringify(err),
+			icon: 'error',
+		})
 	})
 
 	formTransaction.on('submit', async submission => {
@@ -93,7 +107,14 @@ window.onload = async () => {
 		await updateMerch(
 			transactions
 		).then(() => {
-				window.location.reload()
+				Swal.fire({
+					title: 'Success!',
+					text: 'Wait for page to reload...',
+					icon: 'success',
+					timer: 3000,
+					timerProgressBar: true
+				})
+				.then(() => window.location.reload())
 			}
 		)
 	})

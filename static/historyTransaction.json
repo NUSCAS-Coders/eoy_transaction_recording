@@ -33,7 +33,6 @@
                   },
                   "key": "artistId",
                   "type": "select",
-                  "selectValues": "data",
                   "hideOnChildrenHidden": false,
                   "disableLimit": false,
                   "input": true

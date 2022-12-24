@@ -19,7 +19,7 @@ class Transaction(JSONSerializable):
 
 class Merch(JSONSerializable):
     def __init__(self, merchId, index, artistId, currentStock, initialPrice, imageLink, discountable = False):
-        print(merchId, index, artistId, currentStock, initialPrice)
+        # print(merchId, index, artistId, currentStock, initialPrice)
         self.artistId = artistId
         self.merchId = merchId
         self.index = index
@@ -30,7 +30,7 @@ class Merch(JSONSerializable):
 
 class Artist(JSONSerializable):
     def __init__(self, artistName, artistId, worksheet, imageLinks):
-        print(artistName, artistId, worksheet)
+        # print(artistName, artistId, worksheet)
         self.artistName = artistName
         self.artistId = artistId
         self.merchMap = {}
