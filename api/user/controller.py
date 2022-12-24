@@ -1,7 +1,7 @@
 from typing import List
 from flask import Blueprint, json, jsonify, request
 from flask_cors import cross_origin
-from api.user.service import read_all_user, read_one_user, update_user_password,update_users
+from api.user import service as user_service
 from commons.GlobalState import GlobalState
 from commons.constants import EOY_TRANSACTION_GSHEET_API_URL
 from config.db import db
@@ -15,85 +15,13 @@ import string
 
 user_api = Blueprint("user", __name__)
 
-artistIdDict = {
-    'A': 1,
-    'B': 2,
-    'C': 3,
-    'D': 4,
-    'E': 5,
-    'F': 6,
-    'G': 7,
-    'H': 8,
-    'I': 9,
-    'J': 10,
-    'K': 11,
-    'L1': 12,
-    'L2': 13,
-    'M': 14,
-    'N': 15,
-    'O': 16,
-    'P': 17,
-    'Q': 18,
-    'R': 19,
-    'S': 20,
-    'T': 21,
-    'U': 22,
-    'V': 23,
-    'W': 24,
-    'X': 25,
-    'Y': 26,
-    'Z': 27,
-    'AA': 28,
-    'AB': 29,
-    'AC': 30,
-    'AD': 31,
-}
+
 
 # Updates artist details
 @user_api.route("/update", methods=["GET"], defaults={"sheet_name": None})
 @user_api.route("/update/<sheet_name>", methods=["GET"])
 def update_artists_info(sheet_name):
-    print(sheet_name)
-    # if len(GlobalState().artists) == 0:
-        # sheet_name = None
-    worksheets = getWorksheetsFromGsheetId(EOY_TRANSACTION_GSHEET_API_URL)
-    locWorksheet = list(filter(lambda ws: ws.title == 'List of contents', worksheets))[0]
-
-    progWorksheet = list(filter(lambda ws: ws.title == 'Programming Sheet', worksheets))[0]
-
-    discountableMerch = progWorksheet.row_values(6)
-    print(discountableMerch)
-
-    for i in range(len(worksheets)):
-        worksheet = worksheets[i]
-        if re.match(r'\b[A-Z]+\b', worksheet.title) and (sheet_name is None or worksheet.title == sheet_name):
-            try:
-                artistCount = artistIdDict[worksheet.title]
-                print("TITLE: ", worksheet.title)
-                print(worksheet.cell(2, 3).value)
-
-                # A first update or refresh is performed
-                if sheet_name is None and worksheet.title in GlobalState().artists.keys():
-                    continue
-
-                artist = \
-                    Artist(
-                        locWorksheet.cell(artistCount, 1).value,
-                        worksheet.title,
-                        worksheet
-                    )
-
-                artist.updateWorksheet(worksheet, discountableMerch)
-
-                GlobalState().artists[worksheet.title] = artist
-            except Exception as e:
-                print(e)
-                i -= 1
-
-
-    for artistName, artist in GlobalState().artists.items():
-        print(artistName, artist.artistName, artist.merchMap)
-
+    user_service.update_artists_info(sheet_name)
     return (
         jsonify(success=True, data="Updated"),
         status.HTTP_200_OK,
@@ -142,10 +70,25 @@ def get_read_merch(artistId):
 
 @user_api.route("/<artistId>/merch/id", methods=["GET"])
 def get_read_merch_id(artistId):
+    user_service.update_artists_info(artistId)
     artist = GlobalState().artists[artistId]
+
+
+    def generateImageImgComponent(v):
+        if not isinstance(v.imageLink, list):
+            v.imageLink = [v.imageLink]
+        return " ".join(
+            list(map(
+                lambda l: f"<img src={l} width=\"32\"></img>",
+                v.imageLink
+            ))
+        )
+
     payload = *[{
         "label": f"{v.artistId}{v.merchId}",
-        "value": f"{v.artistId}{v.merchId}"
+        "value": f"{v.artistId}{v.merchId}",
+        "imageLink": v.imageLink,
+        "embedCode": generateImageImgComponent(v)
     } for v in filter(
         lambda a: a.currentStock > 0,
         artist.merchMap.values()
@@ -159,6 +102,7 @@ def get_read_merch_id(artistId):
 
 @user_api.route("/<artistId>/merch/<merchId>/price", methods=["GET"])
 def get_read_merch_price(artistId, merchId):
+    user_service.update_artists_info(artistId)
     artist = GlobalState().artists[artistId]
     merch = artist.merchMap[merchId]
     payload = [
@@ -184,6 +128,7 @@ def get_read_merch_price(artistId, merchId):
 
 @user_api.route("/<artistId>/merch/<merchId>/qty/range", methods=["GET"])
 def get_read_merch_qty(artistId, merchId):
+    user_service.update_artists_info(artistId)
     artist = GlobalState().artists[artistId]
     merch = artist.merchMap[merchId]
     payload = [

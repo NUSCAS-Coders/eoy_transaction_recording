@@ -18,21 +18,23 @@ class Transaction(JSONSerializable):
         self.formRepr = formRepr
 
 class Merch(JSONSerializable):
-    def __init__(self, merchId, index, artistId, currentStock, initialPrice, discountable = False):
+    def __init__(self, merchId, index, artistId, currentStock, initialPrice, imageLink, discountable = False):
         print(merchId, index, artistId, currentStock, initialPrice)
         self.artistId = artistId
         self.merchId = merchId
         self.index = index
         self.currentStock = int(currentStock)
         self.initialPrice = initialPrice
+        self.imageLink = imageLink
         self.discountable = discountable
 
 class Artist(JSONSerializable):
-    def __init__(self, artistName, artistId, worksheet):
+    def __init__(self, artistName, artistId, worksheet, imageLinks):
         print(artistName, artistId, worksheet)
         self.artistName = artistName
         self.artistId = artistId
         self.merchMap = {}
+        self.imageLinks = imageLinks
 
     def toJSON(self):
         return {
@@ -44,22 +46,21 @@ class Artist(JSONSerializable):
     def updateWorksheet(self, worksheet, discountableMerch):
         self.worksheet = worksheet
         self.df = getDfFromWorksheet(worksheet)
-        count = 0
-        for merch in self.df.columns[1:]:
-            print(self.merchMap)
+        for i, merch in enumerate(self.df.columns[1:]):
+            # print(self.merchMap)
             self.merchMap[merch] = Merch(
                 merch.replace(self.artistId, '', 1),
-                count,
+                i,
                 self.artistId,
                 self.df.loc['Current Stock', merch],
                 self.df.loc['Initial Price', merch],
+                self.imageLinks[i],
                 merch in discountableMerch
             )
-            count +=1
 
     def handlePurchase(self, transactions: List[Transaction], savedTransactions):
         for id, transaction in enumerate(transactions):
-            print("hi: ", transaction.toJSON())
+            # print("hi: ", transaction.toJSON())
             existingTransactions = self.worksheet.col_values(OFFSET_MERCH_COL + transaction.merch.index)[OFFSET_TRANSACTION_ROW:]
             
             for i in range(transaction.qty):
@@ -69,7 +70,7 @@ class Artist(JSONSerializable):
                     transaction.price
                 ) 
 
-            print(self.worksheet.col_values(OFFSET_MERCH_COL + transaction.merch.index)[OFFSET_TRANSACTION_ROW:])
+            # print(self.worksheet.col_values(OFFSET_MERCH_COL + transaction.merch.index)[OFFSET_TRANSACTION_ROW:])
 
             savedTransactions.append(
                 transaction.formRepr

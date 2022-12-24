@@ -52,4 +52,4 @@ if __name__ == "__main__":
 
     if __name__ == "__main__":
         update_artists_info()
-        app.run(port=int(os.getenv("PORT")), host=os.getenv("HOST"), debug=True)
+        app.run(port=int(os.getenv("PORT")), host=os.getenv("HOST"), debug=os.getenv("MODE") == "development")

@@ -8,10 +8,10 @@ PATH_TO_CREDENTIALS = "./cred/gsheets/credentials_excel.json"
 def getDfFromWorksheet(worksheet) -> pd.DataFrame:
     worksheet_values = worksheet.get_all_values()
     df_worksheet = pd.DataFrame(worksheet_values)
-    print(df_worksheet.shape)
+    # print(df_worksheet)
     df_worksheet.columns = df_worksheet.iloc[2]
     df_worksheet.reset_index(drop=True)
-    print(df_worksheet.iloc[:, 0])
+    # print(df_worksheet.iloc[:, 0])
 
     # indices = df_worksheet.iloc[:, 0] 
     # indices.add(pd.Series(list(range(df_worksheet.shape[0] - OFFSET_TRANSACTION_ROW))))
@@ -19,8 +19,8 @@ def getDfFromWorksheet(worksheet) -> pd.DataFrame:
     df_worksheet.index = df_worksheet.iloc[:, 0]
     # df_worksheet.index = [*df_worksheet.iloc[:, 0], *list(range(df_worksheet.shape[0] - OFFSET_TRANSACTION_ROW))]
     df_worksheet = df_worksheet.iloc[:,1:]
-    print(df_worksheet.columns)
-    print(df_worksheet)
+    # print(df_worksheet.columns)
+    # print(df_worksheet)
 
     return df_worksheet
 
@@ -38,13 +38,12 @@ def getWorksheetsFromGsheetId(docid):
     output_df = None
     worksheets = spreadsheet.worksheets()
     return worksheets
+"""
+def getAllWorksheets(docid):
+    worksheets = getWorksheetsFromGsheetId(docid)
 
-    """
     # Combine all sheets to one single dataframe.
     for id, worksheet in enumerate(worksheets, start = 1):
-        if not (id <= 6 and id > 5):
-            continue
-
         print(worksheet.title)
 
         worksheet_values = worksheet.get_all_values()

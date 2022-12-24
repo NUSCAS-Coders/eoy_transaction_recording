@@ -63,7 +63,7 @@
                       }
                     ]
                   },
-                  "template":"<span>{{ item.label}}<img src=\"https://drive.google.com/uc?export=preview&id=12K98sWK_zbGf-MfdbaXdNhvdOwMvNtRk\" width=\"32\"></img></span>",
+                  "template":"<span>{{ item.label}} {{item.embedCode}}</span>",
                   "refreshOn": "artistId",
                   "key": "merchId",
                   "type": "select",
