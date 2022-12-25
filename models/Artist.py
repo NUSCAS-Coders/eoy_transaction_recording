@@ -23,6 +23,7 @@ class Merch(JSONSerializable):
         self.artistId = artistId
         self.merchId = merchId
         self.index = index
+        print("CS: ", currentStock)
         self.currentStock = int(currentStock)
         self.initialPrice = initialPrice
         self.imageLink = imageLink
@@ -47,7 +48,7 @@ class Artist(JSONSerializable):
         self.worksheet = worksheet
         self.df = getDfFromWorksheet(worksheet)
         for i, merch in enumerate(self.df.columns[1:]):
-            # print(self.merchMap)
+            print("MERCH: ", merch)
             self.merchMap[merch] = Merch(
                 merch,
                 i,

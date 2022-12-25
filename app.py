@@ -39,5 +39,6 @@ app.register_blueprint(user_api, url_prefix="/user")
 def serve_home_page():
     return render_template('index.html', SERVER_URL=os.getenv("SERVER_URL"))
 
-update_artists_info()
+# update_artists_info("A")
+update_artists_info("T")
 app.run(port=int(os.getenv("PORT")), host=os.getenv("HOST"), debug=os.getenv("MODE") == "development", threaded=False)

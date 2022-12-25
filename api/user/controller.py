@@ -85,14 +85,19 @@ def get_read_merch_id(artistId):
 
         if v.discountable:
             attributes.append(
-                "<span class=\"badge badge-info badge-secondary\">Giveaway</span>"
+                "<span class=\"badge badge-info\">Giveaway</span>"
             )
+        if "set" in v.merchId.lower():
+            attributes.append(
+                "<span class=\"badge badge-primary\">Set</span>"
+            )
+
 
         return " ".join(attributes)
 
     payload = *[{
         "label": f"{v.merchId}",
-        "value": f"{v.artistId}{v.merchId}",
+        "value": f"{v.merchId}",
         "imageLink": v.imageLink,
         "embedCode": generateImageImgComponent(v)
     } for v in filter(
