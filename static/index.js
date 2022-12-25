@@ -1,8 +1,8 @@
 const SERVER_URL_DEV = SERVER_URL + ":5000";
 formData = {}
 
-const updateModels = async () => {
-	return await axios.get(`http://${SERVER_URL_DEV}/user/update/A`).then(res => res.data)
+const updateModels = async (artistId=None) => {
+	return await axios.get(`http://${SERVER_URL_DEV}/user/update/${artistId ?? ""}`).then(res => res.data)
 }
 
 const getAllArtistIds = async () => {
@@ -50,7 +50,7 @@ window.onload = async () => {
 	console.log(formTransaction)
 	formTransaction.submission.data.curr = {}
 
-	formTransaction.on('change', changed => {
+	formTransaction.on('change', async changed => {
 		console.log(changed)
 		if (changed.state == 'submitted' || !changed?.changed) {
 			return
@@ -67,6 +67,15 @@ window.onload = async () => {
 
 		switch(changedCompKey) {
 			case 'artistId':
+				Swal.fire({
+					title: 'Retrieving user info...',
+					didOpen: async () => {
+						Swal.showLoading();
+						await updateModels(changed.changed.value.value);
+						Swal.close();
+					},
+					willClose: () => null
+				})
 			case 'merchId':
 			case 'price':
 			case 'qty':
@@ -106,18 +115,25 @@ window.onload = async () => {
 				datetime: data.datetime
 			})
 		) 		
-		await updateMerch(
-			transactions
-		).then(() => {
-				Swal.fire({
-					title: 'Success!',
-					text: 'Wait for page to reload...',
-					icon: 'success',
-					timer: 3000,
-					timerProgressBar: true
+		Swal.fire({
+			title: 'Submitting transaction...',
+			didOpen: async () => {
+				Swal.showLoading();
+				await updateMerch(
+					transactions
+				).then(() => {
+					Swal.fire({
+						title: 'Success!',
+						text: 'Wait for page to reload...',
+						icon: 'success',
+						timer: 1000,
+						timerProgressBar: true
+					}).then(() => 
+						window.location.reload()
+					)
 				})
-				.then(() => window.location.reload())
-			}
-		)
+			},
+			willClose: () => null
+		})
 	})
 }

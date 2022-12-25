@@ -49,7 +49,7 @@ class Artist(JSONSerializable):
         for i, merch in enumerate(self.df.columns[1:]):
             # print(self.merchMap)
             self.merchMap[merch] = Merch(
-                merch.replace(self.artistId, '', 1),
+                merch,
                 i,
                 self.artistId,
                 self.df.loc['Current Stock', merch],

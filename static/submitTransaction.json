@@ -18,7 +18,7 @@
                 {
                   "label": "Artist ID",
                   "widget": "choicesjs",
-                  "placeholder": "-- Select Artist ID --",
+                  "placeholder": "i.e A",
                   "tableView": true,
                   "dataSrc": "url",
                   "data": {
@@ -50,6 +50,7 @@
               "components": [
                 {
                   "label": "Merch ID",
+                  "placeholder": "i.e A5 (KC)",
                   "widget": "choicesjs",
                   "tableView": true,
                   "dataSrc": "url",
@@ -83,6 +84,7 @@
               "components": [
                 {
                   "label": "Price",
+                  "placeholder": "i.e $5",
                   "widget": "choicesjs",
                   "tableView": true,
                   "dataSrc": "url",
@@ -115,6 +117,7 @@
               "components": [
                 {
                   "label": "Quantity",
+                  "placeholder": "i.e 5",
                   "widget": "choicesjs",
                   "tableView": true,
                   "dataSrc": "url",

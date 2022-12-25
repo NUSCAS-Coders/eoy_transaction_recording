@@ -21,8 +21,8 @@ print(artistIdDict)
 
 def update_artists_info(sheet_name=None):
 
-    if len(GlobalState().artists) == 0:
-        sheet_name = None
+    # if len(GlobalState().artists) == 0:
+        # sheet_name = None
 
     mode = os.getenv("MODE").upper()
     worksheets = getWorksheetsFromGsheetId(

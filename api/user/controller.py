@@ -69,22 +69,29 @@ def get_read_merch(artistId):
 
 @user_api.route("/<artistId>/merch/id", methods=["GET"])
 def get_read_merch_id(artistId):
-    user_service.update_artists_info(artistId)
+    # user_service.update_artists_info(artistId)
     artist = GlobalState().artists[artistId]
 
 
     def generateImageImgComponent(v):
         if not isinstance(v.imageLink, list):
             v.imageLink = [v.imageLink]
-        return " ".join(
-            list(map(
+
+        attributes = list(map(
                 lambda l: f"<img src={l} width=\"32\"></img>",
                 v.imageLink
             ))
-        )
+        
+
+        if v.discountable:
+            attributes.append(
+                "<span class=\"badge badge-info badge-secondary\">Giveaway</span>"
+            )
+
+        return " ".join(attributes)
 
     payload = *[{
-        "label": f"{v.artistId}{v.merchId}",
+        "label": f"{v.merchId}",
         "value": f"{v.artistId}{v.merchId}",
         "imageLink": v.imageLink,
         "embedCode": generateImageImgComponent(v)
@@ -101,7 +108,7 @@ def get_read_merch_id(artistId):
 
 @user_api.route("/<artistId>/merch/<merchId>/price", methods=["GET"])
 def get_read_merch_price(artistId, merchId):
-    user_service.update_artists_info(artistId)
+    # user_service.update_artists_info(artistId)
     artist = GlobalState().artists[artistId]
     merch = artist.merchMap[merchId]
     payload = [
@@ -127,7 +134,7 @@ def get_read_merch_price(artistId, merchId):
 
 @user_api.route("/<artistId>/merch/<merchId>/qty/range", methods=["GET"])
 def get_read_merch_qty(artistId, merchId):
-    user_service.update_artists_info(artistId)
+    # user_service.update_artists_info(artistId)
     artist = GlobalState().artists[artistId]
     merch = artist.merchMap[merchId]
     payload = [
