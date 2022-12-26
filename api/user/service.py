@@ -19,6 +19,27 @@ artistIdDict = {}
 artistNameDict = {}
 print(artistIdDict)
 
+def generateImageImgComponent(v):
+        if not isinstance(v.imageLink, list):
+            v.imageLink = [v.imageLink]
+
+        attributes = list(map(
+                lambda l: f"<img src={l} width=\"32\"></img>",
+                v.imageLink
+            ))
+        
+
+        if v.discountable:
+            attributes.append(
+                "<span class=\"badge badge-info\">Giveaway</span>"
+            )
+        if "set" in v.merchId.lower():
+            attributes.append(
+                "<span class=\"badge badge-primary\">Set</span>"
+            )
+
+
+        return " ".join(attributes)
 def update_artists_info(sheet_name=None):
 
     # if len(GlobalState().artists) == 0:

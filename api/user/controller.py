@@ -7,7 +7,7 @@ from config.db import db
 from helpers.gsheet import getWorksheetsFromGsheetId
 from models.Artist import Artist, Transaction
 from .models.user import User
-from .service import create_user
+from .service import create_user, generateImageImgComponent
 from flask_api import status
 import re
 import string
@@ -67,33 +67,27 @@ def get_read_merch(artistId):
         {"Content-Type": "application/json"},
     )
 
+@user_api.route("/<artistId>/merch/<merchId>", methods=["GET"])
+def get_merch_given_artistId_and_merchId(artistId, merchId):
+    artist = GlobalState().artists[artistId]
+    payload = {
+        **artist.merchMap[merchId].toJSON(),
+        "imageLink": artist.merchMap[merchId].imageLink,
+        "embedCode": generateImageImgComponent(artist.merchMap[merchId])
+    }
+    return (
+        jsonify(success=True, data=payload),
+        status.HTTP_200_OK,
+        {"Content-Type": "application/json"},
+    )
+
 @user_api.route("/<artistId>/merch/id", methods=["GET"])
 def get_read_merch_id(artistId):
     # user_service.update_artists_info(artistId)
     artist = GlobalState().artists[artistId]
 
 
-    def generateImageImgComponent(v):
-        if not isinstance(v.imageLink, list):
-            v.imageLink = [v.imageLink]
-
-        attributes = list(map(
-                lambda l: f"<img src={l} width=\"32\"></img>",
-                v.imageLink
-            ))
-        
-
-        if v.discountable:
-            attributes.append(
-                "<span class=\"badge badge-info\">Giveaway</span>"
-            )
-        if "set" in v.merchId.lower():
-            attributes.append(
-                "<span class=\"badge badge-primary\">Set</span>"
-            )
-
-
-        return " ".join(attributes)
+    
 
     payload = *[{
         "label": f"{v.merchId}",

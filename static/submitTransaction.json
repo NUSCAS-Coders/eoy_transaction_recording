@@ -22,7 +22,7 @@
                   "tableView": true,
                   "dataSrc": "url",
                   "data": {
-                    "url": "http://<SERVER_URL>:5000/user/artistIds",
+                    "url": "http://<SERVER_URL>/user/artistIds",
                     "headers": [
                       {
                         "key": "",
@@ -55,7 +55,7 @@
                   "tableView": true,
                   "dataSrc": "url",
                   "data": {
-                    "url": "http://<SERVER_URL>:5000/user/{{data.artistId}}/merch/id",
+                    "url": "http://<SERVER_URL>/user/{{data.artistId}}/merch/id",
                     "headers": [
                       {
                         "key": "",
@@ -89,7 +89,7 @@
                   "tableView": true,
                   "dataSrc": "url",
                   "data": {
-                    "url": "http://<SERVER_URL>:5000/user/{{data.artistId}}/merch/{{data.merchId}}/price",
+                    "url": "http://<SERVER_URL>/user/{{data.artistId}}/merch/{{data.merchId}}/price",
                     "headers": [
                       {
                         "key": "",
@@ -122,7 +122,7 @@
                   "tableView": true,
                   "dataSrc": "url",
                   "data": {
-                    "url": "http://<SERVER_URL>:5000/user/{{data.artistId}}/merch/{{data.merchId}}/qty/range",
+                    "url": "http://<SERVER_URL>/user/{{data.artistId}}/merch/{{data.merchId}}/qty/range",
                     "headers": [
                       {
                         "key": "",

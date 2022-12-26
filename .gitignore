@@ -1,4 +1,5 @@
 cred
-.env
+.env*
 env
 **/__pycache__
+!.env.template

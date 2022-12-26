@@ -21,16 +21,6 @@ r"/*":{
 }})
 
 app.config['CORS_HEADERS'] = 'Content-Type'
-# config_db(app)
-# jwt = JWTManager(app)
-
-# app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY")
-# app.config["JWT_TOKEN_LOCATION"] = ["headers"]
-
-# @app.after_request
-# def refresh_expiring_jwts(response):
-    # print("hii")
-    # return auth_service.refresh_jwt_token(response)
 
 # Registering controllers
 app.register_blueprint(user_api, url_prefix="/user")
@@ -39,6 +29,6 @@ app.register_blueprint(user_api, url_prefix="/user")
 def serve_home_page():
     return render_template('index.html', SERVER_URL=os.getenv("SERVER_URL"))
 
-# update_artists_info("A")
-update_artists_info("T")
+update_artists_info()
+# update_artists_info()
 app.run(port=int(os.getenv("PORT")), host=os.getenv("HOST"), debug=os.getenv("MODE") == "development", threaded=False)
