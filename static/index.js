@@ -199,7 +199,29 @@ const handleTDiscountTransaction = async (form) => {
 }
 
 const updateModels = async (artistId=None) => {
-	return await axios.get(`http://${SERVER_URL}/user/update/${artistId ?? ""}`).then(res => res.data)
+	return await axios
+		.get(`http://${SERVER_URL}/user/update/${artistId ?? ""}`)
+		.then(res => res.data)
+		.catch(async err => {
+			var title = "Error occured!"
+			var text = err.message
+			console.log("EEEE", err)
+
+			if (err.response?.data?.data?.error?.code ?? null == 429) {
+				title = "Error due to Sheet API limit!"
+				text = "Try again later..."
+			}
+
+			await Swal.fire({
+				title: title,
+				text: text,
+				icon: 'error',
+				timer: 1000,
+				timerProgressBar: true
+			}).then(() =>
+				window.location.reload()
+			)
+		})
 }
 
 const getAllArtistIds = async () => {
@@ -342,11 +364,21 @@ window.onload = async () => {
 
 	})
 
-	formTransaction.on('error', async err => {
-		console.log("ERR: ", err)
+
+	formTransaction.on('error', async errors => {
+		console.log("ERR: ", errors)
 		Swal.fire({
 			title: 'Error!',
-			text: JSON.stringify(err),
+			text: JSON.stringify(errors),
+			icon: 'error',
+		})
+	})
+
+	formTransaction.on('componentError', async errors => {
+		console.log("ERR: ", errors)
+		Swal.fire({
+			title: 'Error!',
+			text: "Fill the form in order!",
 			icon: 'error',
 		})
 	})
