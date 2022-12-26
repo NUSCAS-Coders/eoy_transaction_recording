@@ -1,4 +1,11 @@
 # EOY Transaction app
+![](docs/img/palette_logo.png)
+
+## Disclaimer
+This web app is running off a sanitised google sheet.
+
+## Deployed application
+[Click here to see the deployed app!](http://54.250.63.85:5000)
 
 ## Premise 
 1. There is a use case for a web app when my university's club sets out to booth at a Japanese Cultural event (EOY 2022), and there is a need to account for the transactions and dealings of merchandises by 28 artists, all of which may have very different discount models and pricing. 
@@ -45,4 +52,8 @@ Application can retrieve list of merch ids, eligible prices and quantities to re
 - Each transaction is logged into the Transaction History that is viewable under its own tab.
 - ![](docs/img/eoy_trans_savedrecords.png)
 
-
+### Future
+- Turn this into a mobile application!
+- Accommodate for a variety of discount models that can be represented on Google sheets and executed on the backend (Currently it is not handled on frontend code :l)
+- Code cleanup
+- Rustify this
