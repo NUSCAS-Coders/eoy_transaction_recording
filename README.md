@@ -56,3 +56,4 @@ Application can retrieve list of merch ids, eligible prices and quantities to re
 - Accommodate for a variety of discount models that can be represented on Google sheets and executed on the backend (Currently it is not handled on frontend code :l)
 - Code cleanup
 - Rustify this
+- The images were obtained by copying image urls from the web developer console. If only we have a way to programmatically do this part...
