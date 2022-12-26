@@ -1,3 +1,4 @@
+from typing import List
 from gspread.client import APIError
 from api.user.models.user import User
 from commons.GlobalState import GlobalState
@@ -11,7 +12,7 @@ from helpers.gsheet import getWorksheetsFromGsheetId
 import string
 import os
 
-from models.Artist import Artist
+from models.Artist import Artist, Transaction
 
 import re
 
@@ -126,94 +127,128 @@ def update_artists_info(sheet_name=None):
 
         i += 1
 
-def create_user(
-    username: str, firstname: str, lastname: str, email:str, address:str, password: str, UserID: str
-) -> User:
-    user = User(
-        username=username,
-        firstname=firstname,
-        lastname=lastname,
-        password=password,
-        email=email,
-        address=address,
-        UserID=UserID,
+def getArtist(artistId):
+    payload = list(map(
+        lambda a: a.toJSON(),
+        filter(
+            lambda a: artistId is None or a.artistId == artistId,
+            GlobalState().artists.values()
+        )
+    ))
+    return payload
+
+def getAllArtistIds():
+    payload = list(GlobalState().artists.keys())
+    payload = [{
+        "label": f"{a.artistId} - {a.artistName}",
+        "value": a.artistId
+    } for a in GlobalState().artists.values()]
+    return payload
+
+def getAllArtistMerch(artistId):
+    artist = GlobalState().artists[artistId]
+    payload = {k: v.toJSON() for k, v in artist.merchMap.items()},
+    return payload
+
+def getMerch(artistId, merchId):
+    artist = GlobalState().artists[artistId]
+    payload = {
+        **artist.merchMap[merchId].toJSON(),
+        "imageLink": artist.merchMap[merchId].imageLink,
+        "embedCode": generateImageImgComponent(artist.merchMap[merchId])
+    }
+    return payload
+
+def getAllArtistMerchIdForFormIO(artistId):
+    artist = GlobalState().artists[artistId]
+
+    payload = [{
+        "label": f"{v.merchId}",
+        "value": f"{v.merchId}",
+        "imageLink": v.imageLink,
+        "embedCode": generateImageImgComponent(v)
+    } for v in filter(
+        lambda a: a.currentStock > 0,
+        artist.merchMap.values()
+    )]
+
+    return payload
+
+def getMerchPrice(artistId, merchId):
+    artist = GlobalState().artists[artistId]
+    merch = artist.merchMap[merchId]
+    payload = [
+        {
+            "label": f"{merch.initialPrice}",
+            "value": float(merch.initialPrice[1:])
+        }
+    ]
+
+    if merch.discountable:
+        payload.append(
+            {
+                "label": f"Giveaway",
+                "value": 0
+            }
+        )
+    return payload
+
+def getListOfAllowedMerchQty(artistId, merchId):
+    artist = GlobalState().artists[artistId]
+    merch = artist.merchMap[merchId]
+    payload = [
+        {
+            "label": f"{i}",
+            "value": i
+        }
+    for i in range(1, merch.currentStock+1)]
+    return payload
+
+
+"""
+Submits the batch of merch orders, and updates a local transaction json.
+"""
+def updateMerchTransactions(
+    requestBodyTransactions
+):
+    listOfTransactions = map(
+        lambda t: Transaction(
+            t["artistId"]["value"],
+            GlobalState().artists[t["artistId"]["value"]].merchMap[t["merchId"]["value"]],
+            t["qty"]["value"],
+            t["price"]["value"],
+            t
+        ),
+        requestBodyTransactions
     )
-    db.session.add(user)
-    db.session.commit()
-    return user
 
-# def read_one_user(
-#     **kwargs
-# ) -> User:
-#     return User.query.filter_by(
-#         **kwargs
-#     ).all()
+    listOfArtistIds = set(list(map(
+        lambda t: t["artistId"]["value"],
+        requestBodyTransactions
+    )))
 
-def read_one_user(userID):
-    res =  User.query.filter_by(userID=userID).first()
-    return res
+    print(listOfArtistIds)
 
+    artists: List[Artist] = list(filter(lambda a: a.artistId in listOfArtistIds, GlobalState().artists.values()))
 
-def read_all_user(
-    **kwargs
-) -> User:
-    user = User.query.filter(
-        **kwargs
-    ).all()
-
-    print(user)
-
-    res = list(map(
-        lambda u: u.serialize(),
-        user
-    ))
-
-    print("res", res)
-    db.session.commit()
-
-    return( jsonify(
-        success=True,
-        data=res
-    ), status.HTTP_200_OK)
-
-def update_users(
-
-   username: str, firstName: str, lastName: str, email: str, address: str, userID: str
-) -> User:
-    user = User.query.filter_by(userID = userID)
-
-    user.update({
-        "username":username ,
-        "firstName":firstName,
-        "lastName":lastName,
-        "email":email,
-        "address":address,
-        })
-
-    res = list(map(
-            lambda u: u.serialize(),
-            user
-        ))
-
-    db.session.commit()
+    savedTransactions = []
+    with open('static/transactions.json', 'r') as f:
+        if f is not None:
+            savedTransactions = json.loads(f.read())
+    
+    for artist in artists:
+        print(artist)
+        artist.handlePurchase(
+            list(filter(
+                lambda t: t.artistId == artist.artistId,
+                listOfTransactions
+            )),
+            savedTransactions
+        )
 
 
-    return res
+    with open('static/transactions.json', 'w') as f:
+        f.write(json.dumps(savedTransactions))
 
-def update_user_password(
-
-    userID: str , username: str, password: str
-) -> User:
-    user = User.query.filter_by(userID = userID)
-
-    user.update({"password":password})
-
-    res = list(map(
-        lambda u: u.serialize(),
-        user
-    ))
-
-    db.session.commit()
-
-    return res
+    return True
 
