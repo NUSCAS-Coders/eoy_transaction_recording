@@ -16,7 +16,6 @@ This web app is running off a sanitised google sheet.
 1. Start a virtual environment
 1. Install dependencies in requirement.txt
 1. run `python app.py`
-1. PHPMyAdmin: https://remotemysql.com/phpmyadmin/index.php?db=GE19cBzQvw
 
 ## Feature List
 ### Artist Ids 
