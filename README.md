@@ -11,6 +11,11 @@ This web app is running off a sanitised google sheet.
 1. There is a use case for a web app when my university's club sets out to booth at a Japanese Cultural event (EOY 2022), and there is a need to account for the transactions and dealings of merchandises by 28 artists, all of which may have very different discount models and pricing. 
 1. This application seeks to reflect the information expressed in the google sheet to facilitate such transactions in an idiot proof manner. If not possible to do so for certain business constraints, the application will implement the constraint programmatically (although it is not my preferred way of doing so.)
 
+### Tech Stack
+- Python Flask
+- Static served HTML page
+- Formio, which is a library to serve forms via JSON specifications.
+
 ## Instructions
 1. Use Python 3.10
 1. Start a virtual environment
@@ -51,9 +56,12 @@ Application can retrieve list of merch ids, eligible prices and quantities to re
 - Each transaction is logged into the Transaction History that is viewable under its own tab.
 - ![](docs/img/eoy_trans_savedrecords.png)
 
+### Concerns
+- The current synchronicity with the Google sheet is performed via the GSpread library, which function incurs a Google Sheet v4 API call that is limited by rate. If the rate is too high, the call will fail. We need to find a way to efficiently make a sustainable number of API calls, and also handle that error (We have yet to handle that at the frontend :/)
+
 ### Future
 - Turn this into a mobile application!
-- Accommodate for a variety of discount models that can be represented on Google sheets and executed on the backend (Currently it is not handled on frontend code :l)
+- Accommodate for a variety of discount models that can be represented on Google sheets and executed on the backend (Currently it is handled on frontend code :l)
 - Code cleanup
 - Rustify this
 - The images were obtained by copying image urls from the web developer console. If only we have a way to programmatically do this part...
